@@ -1,0 +1,81 @@
+name: Test
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  issues: write
+
+env:
+  python_version: "3.12"
+  poetry_version: "2.1.1"
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Install system deps
+      run: |
+        sudo apt-get remove -y man-db
+        sudo apt-get update
+        sudo apt-get install -y \
+          pipx \
+          make
+
+    # Note, we could enable poetry cache here, but this would require reclaiming some
+    # space (~3min) on the agent and fetching the cache (~1min)
+    - uses: actions/setup-python@v6
+      with:
+        python-version: ${{ env.python_version }}
+
+    - name: Install Poetry
+      run: |
+        pipx ensurepath
+        pipx install poetry==${{ env.poetry_version }} --python python${{ env.python_version }}
+        poetry config virtualenvs.create true --local
+        poetry config virtualenvs.in-project true --local
+
+    - name: Configure git
+      run: |
+        git config --global url."https://${{ secrets.CORTI_GITHUB_TOKEN_READ_ALL }}@github.com/".insteadOf "https://github.com/"
+        git config --global url."https://${{ secrets.CORTI_GITHUB_TOKEN_READ_ALL }}@github.com/".insteadOf "git@github.com:"
+        git config --global url."https://${{ secrets.CORTI_GITHUB_TOKEN_READ_ALL }}@github.com/".insteadOf "ssh://git@github.com/"
+        sed -i "s#https://github.com/corticph/#https://${{ secrets.CORTI_GITHUB_TOKEN_READ_ALL }}@github.com/corticph/#g" .pre-commit-config.yaml
+
+    - name: Install dependencies
+      run: |
+        poetry install --no-interaction --with test
+
+    - name: Run pre-commit
+      run: |
+        make pre-commit-pipeline
+
+    - name: Run tests
+      run: |
+        make test
+
+    - name: Upload Python coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-coverage-report
+        path: |
+          coverage.xml
+          htmlcov/
+
+    - name: Get Coverage
+      uses: orgoro/coverage@7dbd48c7f7ed09df337ff40058340c85bc93cb3d
+      with:
+          coverageFile: coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
