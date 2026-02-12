@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+import pandas as pd
 import rich_click as click
 from bewer import Dataset
 from bewer.reporting.html.labels import HTMLAlignmentLabels
@@ -127,8 +128,44 @@ def report(
 ) -> None:
     """Generate an ASR evaluation report from a CSV file."""
 
+    click.echo()
+
     if output_path is None:
         output_path = Path(f"canal-report-{datetime.now().strftime('%Y%m%d-%H%M%S')}.html")
+
+    if not input_path.is_file():
+        click.echo(f"Error: Input CSV file '{input_path.absolute()}' does not exist.", err=True)
+        raise click.Abort()
+
+    if medical_terms is not None and not medical_terms.is_file():
+        click.echo(f"Error: Medical terms file '{medical_terms.absolute()}' does not exist.", err=True)
+        raise click.Abort()
+
+    if ref_col == gen_col:
+        click.echo("Error: --ref-col and --gen-col cannot be the same column.", err=True)
+        raise click.Abort()
+
+    try:
+        df = pd.read_csv(input_path, nrows=0)  # Read only the header row
+    except Exception as e:
+        click.echo(f"Error: Failed to read input CSV file '{input_path.absolute()}'. {str(e)}", err=True)
+        raise click.Abort()
+
+    if ref_col not in df.columns:
+        col_names = ", ".join(df.columns)
+        click.echo(
+            f"Error: --ref-col '{ref_col}' is not a valid column in the input CSV. Available columns: {col_names}",
+            err=True,
+        )
+        raise click.Abort()
+
+    if gen_col not in df.columns:
+        col_names = ", ".join(df.columns)
+        click.echo(
+            f"Error: --gen-col '{gen_col}' is not a valid column in the input CSV. Available columns: {col_names}",
+            err=True,
+        )
+        raise click.Abort()
 
     dataset = Dataset()
     dataset.load_csv(
@@ -136,11 +173,15 @@ def report(
         ref_col=ref_col,
         hyp_col=gen_col,
     )
+
+    click.echo(click.style("✓", fg="green") + f" Successfully loaded {len(dataset)} examples.")
+
     if medical_terms is not None:
         with open(medical_terms, "r") as f:
             keyword_list = [kw.strip() for kw in f.read().strip().splitlines()]
         dataset.add_keyword_list("medical_terms", keyword_list)
         report_metrics = REPORT_METRICS + [MEDICAL_TERM_RECALL]
+        click.echo(click.style("✓", fg="green") + f" Successfully loaded {len(keyword_list)} medical terms.")
     else:
         report_metrics = REPORT_METRICS
 
@@ -153,3 +194,4 @@ def report(
         report_metrics=report_metrics,
         report_summary=REPORT_SUMMARY_ITEMS,
     )
+    click.echo(click.style("✓", fg="green") + f" Report generated at '{output_path.absolute()}'.\n")

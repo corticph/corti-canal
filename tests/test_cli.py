@@ -5,11 +5,16 @@ from click.testing import CliRunner
 from corti_canal.cli.main import MEDICAL_TERM_RECALL, REPORT_METRICS, cli
 
 
+def _write_csv(path, columns=("ref", "gen")):
+    """Write a minimal CSV file with the given column headers."""
+    path.write_text(",".join(columns) + "\n")
+
+
 @patch("corti_canal.cli.main.generate_report")
 @patch("corti_canal.cli.main.Dataset")
 def test_report_default_options(mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
-    csv_path.touch()
+    _write_csv(csv_path)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["report", str(csv_path)])
@@ -29,7 +34,7 @@ def test_report_default_options(mock_dataset_cls, mock_generate_report, tmp_path
 @patch("corti_canal.cli.main.Dataset")
 def test_report_custom_columns(mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
-    csv_path.touch()
+    _write_csv(csv_path, columns=("text", "transcript"))
 
     runner = CliRunner()
     result = runner.invoke(cli, ["report", "--ref-col", "text", "--gen-col", "transcript", str(csv_path)])
@@ -43,7 +48,7 @@ def test_report_custom_columns(mock_dataset_cls, mock_generate_report, tmp_path)
 @patch("corti_canal.cli.main.Dataset")
 def test_report_with_medical_terms(mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
-    csv_path.touch()
+    _write_csv(csv_path)
     terms_path = tmp_path / "terms.txt"
     terms_path.write_text("hypertension\ndiabetes\n")
 
@@ -63,7 +68,7 @@ def test_report_with_medical_terms(mock_dataset_cls, mock_generate_report, tmp_p
 @patch("corti_canal.cli.main.Dataset")
 def test_report_without_medical_terms(mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
-    csv_path.touch()
+    _write_csv(csv_path)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["report", str(csv_path)])
@@ -82,7 +87,7 @@ def test_report_without_medical_terms(mock_dataset_cls, mock_generate_report, tm
 @patch("corti_canal.cli.main.Dataset")
 def test_report_alignment_type_ea(mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
-    csv_path.touch()
+    _write_csv(csv_path)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["report", "--alignment-type", "ea", str(csv_path)])
@@ -97,7 +102,7 @@ def test_report_alignment_type_ea(mock_dataset_cls, mock_generate_report, tmp_pa
 @patch("corti_canal.cli.main.Dataset")
 def test_report_custom_output_path(mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
-    csv_path.touch()
+    _write_csv(csv_path)
     output = tmp_path / "custom.html"
 
     runner = CliRunner()
@@ -113,7 +118,7 @@ def test_report_custom_output_path(mock_dataset_cls, mock_generate_report, tmp_p
 @patch("corti_canal.cli.main.Dataset")
 def test_report_overwrite_flag(mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
-    csv_path.touch()
+    _write_csv(csv_path)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["report", "--overwrite", str(csv_path)])
@@ -129,3 +134,65 @@ def test_report_missing_input():
     result = runner.invoke(cli, ["report"])
 
     assert result.exit_code != 0
+
+
+# --- Error handling tests ---
+
+
+def test_report_input_file_not_found(tmp_path):
+    csv_path = tmp_path / "nonexistent.csv"
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["report", str(csv_path)])
+
+    assert result.exit_code != 0
+    assert "does not exist" in result.output
+
+
+def test_report_medical_terms_file_not_found(tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(csv_path)
+    terms_path = tmp_path / "nonexistent.txt"
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["report", "--medical-terms", str(terms_path), str(csv_path)])
+
+    assert result.exit_code != 0
+    assert "does not exist" in result.output
+
+
+def test_report_same_ref_and_gen_col(tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(csv_path, columns=("text",))
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["report", "--ref-col", "text", "--gen-col", "text", str(csv_path)])
+
+    assert result.exit_code != 0
+    assert "--ref-col and --gen-col cannot be the same column" in result.output
+
+
+def test_report_invalid_ref_col(tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(csv_path, columns=("ref", "gen"))
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["report", "--ref-col", "missing", str(csv_path)])
+
+    assert result.exit_code != 0
+    assert "--ref-col 'missing' is not a valid column" in result.output
+    assert "ref" in result.output
+    assert "gen" in result.output
+
+
+def test_report_invalid_gen_col(tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(csv_path, columns=("ref", "gen"))
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["report", "--gen-col", "missing", str(csv_path)])
+
+    assert result.exit_code != 0
+    assert "--gen-col 'missing' is not a valid column" in result.output
+    assert "ref" in result.output
+    assert "gen" in result.output

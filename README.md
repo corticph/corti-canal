@@ -1,11 +1,11 @@
 <p align="center">
-  <img src=".github/assets/logo.svg" alt="Corti Canal" width="560">
+  <img src="https://raw.githubusercontent.com/corticph/corti-canal/refs/heads/main/.github/assets/logo.svg" alt="Corti Canal" width="560">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/python-%203.10%20|%203.11%20|%203.12%20|%203.13|%203.14-blue" alt="Python Versions">
-  <!--<img src="https://img.shields.io/codecov/c/github/corticph/corti-canal/main.svg?style=flat-square" alt="Coverage" style="margin-left:5px;">-->
-  <!--<img src="https://img.shields.io/pypi/v/corti-canal.svg" alt="PyPI" style="margin-left:5px;">-->
+  <img src="https://img.shields.io/badge/python-%203.10%20|%203.11%20|%203.12%20|%203.13|%203.14-green" alt="Python Versions">
+  <img src="https://codecov.io/gh/corticph/corti-canal/graph/badge.svg" alt="Coverage" style="margin-left:5px;">
+  <img src="https://img.shields.io/pypi/v/corti-canal.svg" alt="PyPI" style="margin-left:5px;">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" style="margin-left:5px;">
 </p>
 
