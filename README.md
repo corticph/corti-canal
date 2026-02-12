@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/assets/logo.svg" alt="Corti Canal" width="560">
+  <img src="https://raw.githubusercontent.com/corticph/corti-canal/refs/heads/main/.github/assets/logo.svg" alt="Corti Canal" width="560">
 </p>
 
 <p align="center">
