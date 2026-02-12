@@ -1,36 +1,82 @@
-[tool.poetry]
-name = "python-package-template"
-version = "0"
-description = ""
-authors = ["Machine Learning R&D"]
-readme = "README.md"
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
-packages = [
-    { include = 'python_package_template', from = 'src' },
+[project]
+name = "corti-canal"
+dynamic = ["version"]
+description = "Command-line tool for ASR evaluation and analysis."
+readme = "README.md"
+requires-python = ">=3.10,<3.15"
+license = { text = "MIT" }
+authors = [{ name = "Machine Learning R&D" }]
+keywords = ["speech-recognition", "evaluation", "ASR", "CLI"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+]
+dependencies = [
+    "rich-click>=1.9.5",
+    "bewer==0.1.0.dev20260211161223",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.11,<3.13"
+[project.scripts]
+canal = "corti_canal.cli.main:cli"
+
+# --- Poetry-specific configuration ---
+
+[tool.poetry]
+name = "corti-canal"
+version = "0.0.0"  # Placeholder for Poetry; actual version is managed by hatch-vcs
+packages = [{ include = "corti_canal", from = "src" }]
+
+[[tool.poetry.source]]
+name = "test-pypi"
+url = "https://test.pypi.org/simple/"
+priority = "supplemental"
+
+# --- Hatch configuration ---
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+local_scheme = "no-local-version"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/corti_canal"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/corti_canal"]
+
+# --- Dev/test groups (Poetry-specific) ---
 
 [tool.poetry.group.dev]
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-ipython = "9.3.0"
+ipython = "^8"
+pre-commit = "^4.2.0"
 ruff = ">=0.1,<0.13"
+build = "^1.0.0"
+twine = "^6.0.0"
 
 [tool.poetry.group.test]
 optional = true
 
 [tool.poetry.group.test.dependencies]
-pre-commit = "^4.2.0"
 pytest = ">=7.4.3,<9.0.0"
-pytest-azurepipelines = "^1.0.5"
 pytest-cov = "^6.1.1"
 pytest-mock = "^3.14.0"
 requests = "^2.31.0"
 typeguard = "^4.4.2"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

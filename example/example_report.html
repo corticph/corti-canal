@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Recognition Performance Report</title>
+    <style>
+        body {
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 14px;
+            background-color: #faf9f5;
+            color: #000000;
+            min-width: 1000px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        body > div,
+        body > table {
+            display: block;
+            overflow-x: auto;
+        }
+        h1 {
+            color: #595959;
+            margin: 60px 0px 30px 0px;
+            text-align: center;
+        }
+        .report-metadata {
+            text-align: center;
+            color: #acacac;
+            margin: 0px 0px 30px 0px;  /* Bottom margin to maintain spacing */
+            font-style: italic;  /* Optional: makes it look more like metadata */
+        }
+        .keyword-box {
+            position: relative;
+            display: inline;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0);
+        }
+
+        /* Add "padding" visually without moving text */
+        .keyword-box::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            bottom: -2px;
+            left: -3px;
+            right: -3px;
+            border: 1px solid rgb(0, 162, 255);
+            pointer-events: none;
+        }
+        .tables-side-by-side {
+            display: flex;
+            gap: 50px;  /* Space between tables */
+        }
+        .divider-title {
+            font-size: 24px;
+            color: #acacac;
+            margin: 60px 0px 30px 0px;
+        }
+        .list-values-container {
+            border-radius: 5px;
+        }
+        .list-values-table {
+            background-color: #ffffff;
+            border-radius: 5px;
+            border-collapse: separate;
+            border: 1px solid #595959;
+            border-spacing: 0;
+            margin-bottom: 15px;
+        }
+        .list-values-table td,
+        .list-values-table th {
+            padding: 10px 20px;
+        }
+        .list-values-table tr.value-row:not(:last-child) td {
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .list-values-table th {
+            font-weight: normal;
+            background-color: #595959;
+            color: #ffffff;
+        }
+        .list-values-table tr.value-row td:nth-child(2) {
+            font-weight: 600;
+        }
+        .list-values-table tr.value-row:first-child td {
+            padding-top: 15px;
+        }
+        .list-values-table tr.value-row:last-child td {
+            padding-bottom: 15px;
+        }
+        .alignment-gallery {
+            overflow: visible; /* The legend will stop sticking when this container scrolls out of view */
+        }
+        .alignment-container {
+            border-radius: 5px;
+        }
+        .alignment-table {
+            background-color: #ffffff;
+            color: #acacac;
+            border-radius: 5px;
+            border-collapse: separate;
+            border: 1px solid #595959;
+            border-spacing: 0;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .alignment-table-lines {
+            text-align: right;
+            padding-left: 10px;
+        }
+        .alignment-table-names {
+            text-align: left;
+            font-weight: normal;
+            padding: 0px 10px;
+        }
+        .alignment-table th {
+            font-weight: normal;
+            text-align: left;
+            background-color: #595959;
+            color: white;
+            padding: 10px 10px;
+        }
+        .alignment-table tr.alignment-row:nth-child(even) td {   /* odd rows starting from row 3 */
+            padding-top: 15px;
+            padding-bottom: 5px;
+        }
+        .alignment-table tr:nth-child(odd) td {   /* odd rows starting from row 3 */
+            padding-top: 5px;
+            padding-bottom: 15px;
+        }
+        .legend-container {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #595959;
+            border-radius: 5px;
+            position: sticky;
+            top: 0;
+            background-color: #ffffff;
+            z-index: 10;
+        }
+        .legend-container-item {
+            display: inline-block;
+            margin: 0px 10px;
+            position: relative;
+        }
+        .legend-container-item[data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            min-width: 200px;
+            max-width: 400px;
+            white-space: normal;
+            word-wrap: break-word;
+            z-index: 20;
+        }
+        .icon {
+            position: absolute;
+            top: 40px;
+            left: 80px;
+        }
+        .icon svg {
+            width: 75px;
+            height: 75px;
+        }
+        .icon svg path {
+            fill: #00000013;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Speech Recognition Performance Report</h1>
+    <p class="report-metadata">Created: February 12, 2026</p>
+
+    <div class="icon">
+
+
+		    <svg width="603" height="600" viewBox="0 0 603 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<path d="M301.476 48.0009C162.593 48.3453 50.1137 161.037 50.1137 300C50.1137 438.831 162.379 551.439 301.08 551.997C301.728 567.993 303.063 583.989 305.076 599.985C304.089 599.994 303.102 600 302.112 600C136.428 600 2.11377 465.684 2.11377 300C2.11377 134.314 136.428 0 302.112 0C303.468 0 304.824 0.00899721 306.174 0.0269344C303.927 16.0182 302.361 32.0094 301.476 48.0009ZM542.841 479.055C544.695 458.244 547.701 437.436 551.862 416.625C566.862 341.625 566.862 266.625 551.862 191.625C547.086 167.732 543.828 143.839 542.094 119.946C579.78 170.095 602.112 232.439 602.112 300C602.112 367.113 580.077 429.078 542.841 479.055ZM445.662 563.49C442.671 514.536 446.073 465.579 455.862 416.625C470.862 341.625 470.862 266.625 455.862 191.625C445.542 140.018 442.323 88.4121 446.205 36.8058C462.717 45.864 478.281 56.4309 492.717 68.3205C491.928 109.422 495.642 150.524 503.862 191.625C518.862 266.625 518.862 341.625 503.862 416.625C496.188 455.004 492.441 493.38 492.621 531.759C478.053 543.747 462.339 554.388 445.662 563.49ZM352.563 595.776C345.486 536.058 347.919 476.343 359.862 416.625C374.862 341.625 374.862 266.625 359.862 191.625C347.382 129.216 345.285 66.8067 353.577 4.39746C369.558 7.16019 385.107 11.1873 400.113 16.372C393.597 74.7897 396.18 133.207 407.862 191.625C422.862 266.625 422.862 341.625 407.862 416.625C396.711 472.389 393.849 528.15 399.282 583.914C384.213 589.071 368.604 593.061 352.563 595.776Z" fill="black"/>
+		</svg>
+
+    </div>
+
+    <div class="divider-title">Summary</div>
+
+    <div class="tables-side-by-side">
+
+
+
+		<div class="list-values-container">
+		    <table class="list-values-table">
+		        <tr>
+		            <th colspan="2">Dataset Metrics</th>
+		        </tr>
+		        <tr class="value-row">
+		            <td>Word Error Rate</td>
+		            <td>9.75%</td>
+		        </tr>
+		        <tr class="value-row">
+		            <td>Character Error Rate</td>
+		            <td>2.34%</td>
+		        </tr>
+		        <tr class="value-row">
+		            <td>Medical Term Recall</td>
+		            <td>87.18%</td>
+		        </tr>
+		    </table>
+		</div>
+
+
+
+
+
+
+
+		<div class="list-values-container">
+		    <table class="list-values-table">
+		        <tr>
+		            <th colspan="2">Dataset Summary</th>
+		        </tr>
+		        <tr class="value-row">
+		            <td>Number of examples</td>
+		            <td>10</td>
+		        </tr>
+		        <tr class="value-row">
+		            <td>Number of reference words</td>
+		            <td>318</td>
+		        </tr>
+		        <tr class="value-row">
+		            <td>Number of reference characters</td>
+		            <td>2,166</td>
+		        </tr>
+		        <tr class="value-row">
+		            <td>Number of generated words</td>
+		            <td>315</td>
+		        </tr>
+		        <tr class="value-row">
+		            <td>Number of generated characters</td>
+		            <td>2,144</td>
+		        </tr>
+		    </table>
+		</div>
+
+
+    </div>
+    <div class="divider-title">Examples</div>
+
+
+
+
+		<div class="alignment-gallery">
+				<div class="legend-container">
+				    Highlight colors:
+				    <span class="legend-container-item" data-tooltip="A word that is correctly generated and matches the reference."><span style="color: #212529;">■</span> Correct</span>
+				    <span class="legend-container-item" data-tooltip="A word that is misspelled in the generated text."><span style="color: #c46f01;">■</span> Misspelling</span>
+				    <span class="legend-container-item" data-tooltip="An extra word that appears in the generated text but not in the reference."><span style="color: #17a2b8;">■</span> Extra Word</span>
+				    <span class="legend-container-item" data-tooltip="A word that is missing from the generated text but appears in the reference."><span style="color: #dc3545;">■</span> Missing Word</span>
+				    <span class="legend-container-item" data-tooltip="Padding tokens added to align the reference and generated text for visualization purposes. These do not correspond to actual words in the reference or generated text."><span style="color: #ededed;">■</span> Padding</span>
+				    <span class="legend-container-item" data-tooltip="Indicates a medical term from the provided keyword list."><span class="keyword-box">Medical Term</span></span>
+				</div>
+
+				<div class="alignment-container">
+				    <table class="alignment-table">
+				        <colgroup>
+				            <col style="width: 3ch;">
+				            <col style="width: 4ch;">
+				            <col style="width: 100%;">
+				        </colgroup>
+				        <tr>
+				            <th colspan="3">Example 1</th>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">1</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #212529;">diagnosed</span>&nbsp;<span style="color: #212529;">with</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">hypertension</span></span>&nbsp;<span style="color: #212529;">and</span>&nbsp;<span style="color: #212529;">prescribed</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">metformin</span></span>&nbsp;<span style="color: #212529;">to</span>&nbsp;<span style="color: #212529;">manage</span>&nbsp;<span class="keyword-box"><span style="color: #c46f01;">blood</span><span style="background-color: #ededed;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;<span style="color: #dc3545;">sugar</span></span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #212529;">diagnosed</span>&nbsp;<span style="color: #212529;">with</span>&nbsp;<span style="color: #212529;">hypertension</span>&nbsp;<span style="color: #212529;">and</span>&nbsp;<span style="color: #212529;">prescribed</span>&nbsp;<span style="color: #212529;">metformin</span>&nbsp;<span style="color: #212529;">to</span>&nbsp;<span style="color: #212529;">manage</span>&nbsp;<span style="color: #c46f01;">bloodsugar</span>&nbsp;<span style="background-color: #ededed;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">2</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">levels</span>&nbsp;<span style="color: #212529;">an</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">mri</span></span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #212529;">also</span>&nbsp;<span style="color: #212529;">ordered</span>&nbsp;<span style="color: #212529;">to</span>&nbsp;<span style="color: #212529;">evaluate</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">condition</span>&nbsp;<span style="color: #c46f01;">further</span>&nbsp;<span style="color: #212529;">follow</span>&nbsp;<span style="color: #212529;">up</span>&nbsp;<span style="color: #212529;">is</span>&nbsp;<span style="color: #212529;">scheduled</span>&nbsp;<span style="color: #dc3545;">in</span>&nbsp;<span style="color: #212529;">two</span>&nbsp;<span style="color: #212529;">weeks</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">levels</span>&nbsp;<span style="color: #212529;">an</span>&nbsp;<span style="color: #212529;">mri</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #212529;">also</span>&nbsp;<span style="color: #212529;">ordered</span>&nbsp;<span style="color: #212529;">to</span>&nbsp;<span style="color: #212529;">evaluate</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">condition</span>&nbsp;<span style="color: #c46f01;">futher</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #212529;">follow</span>&nbsp;<span style="color: #212529;">up</span>&nbsp;<span style="color: #212529;">is</span>&nbsp;<span style="color: #212529;">scheduled</span>&nbsp;<span style="background-color: #ededed;">&nbsp;&nbsp;</span>&nbsp;<span style="color: #212529;">two</span>&nbsp;<span style="color: #212529;">weeks</span>&nbsp;</td>
+				        </tr>
+				    </table>
+				</div>		<div class="alignment-container">
+				    <table class="alignment-table">
+				        <colgroup>
+				            <col style="width: 3ch;">
+				            <col style="width: 4ch;">
+				            <col style="width: 100%;">
+				        </colgroup>
+				        <tr>
+				            <th colspan="3">Example 2</th>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">1</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">after</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">colonoscopy</span></span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">physician</span>&nbsp;<span style="color: #212529;">noted</span>&nbsp;<span style="color: #212529;">mild</span>&nbsp;<span class="keyword-box"><span style="color: #c46f01;">inflammation</span></span>&nbsp;<span style="color: #212529;">in</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">lower</span>&nbsp;<span style="color: #212529;">intestine</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">biopsy</span></span>&nbsp;<span style="color: #212529;">was</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">after</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">colonoscopy</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">physician</span>&nbsp;<span style="color: #212529;">noted</span>&nbsp;<span style="color: #212529;">mild</span>&nbsp;<span style="color: #c46f01;">inflamation</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #212529;">in</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">lower</span>&nbsp;<span style="color: #212529;">intestine</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">biopsy</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">2</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">taken</span>&nbsp;<span style="color: #212529;">from</span>&nbsp;<span style="color: #dc3545;">the</span>&nbsp;<span style="color: #212529;">affected</span>&nbsp;<span style="color: #212529;">area</span>&nbsp;<span style="color: #212529;">for</span>&nbsp;<span style="color: #212529;">further</span>&nbsp;<span style="color: #212529;">analysis</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">tolerated</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">procedure</span>&nbsp;<span style="color: #212529;">well</span>&nbsp;<span style="color: #212529;">without</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">taken</span>&nbsp;<span style="color: #212529;">from</span>&nbsp;<span style="background-color: #ededed;">&nbsp;&nbsp;&nbsp;</span>&nbsp;<span style="color: #212529;">affected</span>&nbsp;<span style="color: #212529;">area</span>&nbsp;<span style="color: #212529;">for</span>&nbsp;<span style="color: #212529;">further</span>&nbsp;<span style="color: #212529;">analysis</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">tolerated</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">procedure</span>&nbsp;<span style="color: #212529;">well</span>&nbsp;<span style="color: #212529;">without</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">3</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">any</span>&nbsp;<span style="color: #212529;">complications</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">any</span>&nbsp;<span style="color: #212529;">complications</span>&nbsp;</td>
+				        </tr>
+				    </table>
+				</div>		<div class="alignment-container">
+				    <table class="alignment-table">
+				        <colgroup>
+				            <col style="width: 3ch;">
+				            <col style="width: 4ch;">
+				            <col style="width: 100%;">
+				        </colgroup>
+				        <tr>
+				            <th colspan="3">Example 3</th>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">1</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">lab</span>&nbsp;<span style="color: #212529;">results</span>&nbsp;<span style="color: #212529;">showed</span>&nbsp;<span style="color: #212529;">elevated</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">cholesterol</span></span>&nbsp;<span style="color: #212529;">and</span>&nbsp;<span style="color: #212529;">low</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">hemoglobin</span></span>&nbsp;<span style="color: #212529;">levels</span>&nbsp;<span style="color: #c46f01;">consistent</span>&nbsp;<span style="color: #212529;">with</span>&nbsp;<span style="color: #212529;">mild</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">anemia</span></span>&nbsp;<span style="color: #212529;">the</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">lab</span>&nbsp;<span style="color: #212529;">results</span>&nbsp;<span style="color: #212529;">showed</span>&nbsp;<span style="color: #212529;">elevated</span>&nbsp;<span style="color: #212529;">cholesterol</span>&nbsp;<span style="color: #212529;">and</span>&nbsp;<span style="color: #212529;">low</span>&nbsp;<span style="color: #212529;">hemoglobin</span>&nbsp;<span style="color: #212529;">levels</span>&nbsp;<span style="color: #c46f01;">consistant</span>&nbsp;<span style="color: #212529;">with</span>&nbsp;<span style="color: #212529;">mild</span>&nbsp;<span style="color: #212529;">anemia</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">2</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">doctor</span>&nbsp;<span style="color: #c46f01;">recommended</span>&nbsp;<span style="color: #212529;">dietary</span>&nbsp;<span style="color: #212529;">changes</span>&nbsp;<span style="color: #212529;">and</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">follow</span>&nbsp;<span style="color: #212529;">up</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">blood</span>&nbsp;<span style="color: #212529;">test</span></span>&nbsp;<span style="color: #212529;">in</span>&nbsp;<span style="color: #212529;">three</span>&nbsp;<span style="color: #212529;">months</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">doctor</span>&nbsp;<span style="color: #c46f01;">recomended</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #212529;">dietary</span>&nbsp;<span style="color: #212529;">changes</span>&nbsp;<span style="color: #212529;">and</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">follow</span>&nbsp;<span style="color: #212529;">up</span>&nbsp;<span style="color: #212529;">blood</span>&nbsp;<span style="color: #212529;">test</span>&nbsp;<span style="color: #212529;">in</span>&nbsp;<span style="color: #212529;">three</span>&nbsp;<span style="color: #212529;">months</span>&nbsp;</td>
+				        </tr>
+				    </table>
+				</div>		<div class="alignment-container">
+				    <table class="alignment-table">
+				        <colgroup>
+				            <col style="width: 3ch;">
+				            <col style="width: 4ch;">
+				            <col style="width: 100%;">
+				        </colgroup>
+				        <tr>
+				            <th colspan="3">Example 4</th>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">1</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">presented</span>&nbsp;<span style="color: #212529;">with</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">displaced</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">fracture</span></span>&nbsp;<span style="color: #212529;">of</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">left</span>&nbsp;<span style="color: #212529;">radius</span>&nbsp;<span style="color: #212529;">after</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">fall</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">ibuprofen</span></span>&nbsp;<span style="color: #212529;">was</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">presented</span>&nbsp;<span style="color: #212529;">with</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">displaced</span>&nbsp;<span style="color: #212529;">fracture</span>&nbsp;<span style="color: #212529;">of</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">left</span>&nbsp;<span style="color: #212529;">radius</span>&nbsp;<span style="color: #212529;">after</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">fall</span>&nbsp;<span style="color: #212529;">ibuprofen</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">2</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #c46f01;">administered</span>&nbsp;<span style="color: #212529;">for</span>&nbsp;<span style="color: #212529;">pain</span>&nbsp;<span style="color: #212529;">relief</span>&nbsp;<span style="color: #212529;">prior</span>&nbsp;<span style="color: #212529;">to</span>&nbsp;<span style="color: #212529;">imaging</span>&nbsp;<span style="color: #212529;">surgical</span>&nbsp;<span style="color: #212529;">intervention</span>&nbsp;<span style="color: #212529;">may</span>&nbsp;<span style="color: #212529;">be</span>&nbsp;<span style="color: #212529;">required</span>&nbsp;<span style="color: #212529;">depending</span>&nbsp;<span style="color: #212529;">on</span>&nbsp;<span style="color: #dc3545;">the</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #c46f01;">administred</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #212529;">for</span>&nbsp;<span style="color: #212529;">pain</span>&nbsp;<span style="color: #212529;">relief</span>&nbsp;<span style="color: #212529;">prior</span>&nbsp;<span style="color: #212529;">to</span>&nbsp;<span style="color: #212529;">imaging</span>&nbsp;<span style="color: #212529;">surgical</span>&nbsp;<span style="color: #212529;">intervention</span>&nbsp;<span style="color: #212529;">may</span>&nbsp;<span style="color: #212529;">be</span>&nbsp;<span style="color: #212529;">required</span>&nbsp;<span style="color: #212529;">depending</span>&nbsp;<span style="color: #212529;">on</span>&nbsp;<span style="background-color: #ededed;">&nbsp;&nbsp;&nbsp;</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">3</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span class="keyword-box"><span style="color: #212529;">x</span>&nbsp;<span style="color: #212529;">ray</span></span>&nbsp;<span style="color: #212529;">findings</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">x</span>&nbsp;<span style="color: #212529;">ray</span>&nbsp;<span style="color: #212529;">findings</span>&nbsp;</td>
+				        </tr>
+				    </table>
+				</div>		<div class="alignment-container">
+				    <table class="alignment-table">
+				        <colgroup>
+				            <col style="width: 3ch;">
+				            <col style="width: 4ch;">
+				            <col style="width: 100%;">
+				        </colgroup>
+				        <tr>
+				            <th colspan="3">Example 5</th>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">1</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #212529;">started</span>&nbsp;<span style="color: #212529;">on</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">insulin</span></span>&nbsp;<span style="color: #212529;">therapy</span>&nbsp;<span style="color: #212529;">following</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">diagnosis</span>&nbsp;<span style="color: #212529;">of</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">type</span>&nbsp;<span style="color: #212529;">two</span>&nbsp;<span style="color: #212529;">diabetes</span></span>&nbsp;<span class="keyword-box"><span style="color: #212529;">hemoglobin</span></span>&nbsp;<span style="color: #212529;">a1c</span></span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #212529;">started</span>&nbsp;<span style="color: #212529;">on</span>&nbsp;<span style="color: #212529;">insulin</span>&nbsp;<span style="color: #212529;">therapy</span>&nbsp;<span style="color: #212529;">following</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">diagnosis</span>&nbsp;<span style="color: #212529;">of</span>&nbsp;<span style="color: #212529;">type</span>&nbsp;<span style="color: #212529;">two</span>&nbsp;<span style="color: #212529;">diabetes</span>&nbsp;<span style="color: #212529;">hemoglobin</span>&nbsp;<span style="color: #212529;">a1c</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">2</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">levels</span>&nbsp;<span style="color: #212529;">were</span>&nbsp;<span style="color: #c46f01;">significantly</span>&nbsp;<span style="color: #212529;">above</span>&nbsp;<span style="background-color: #ededed;">&nbsp;&nbsp;&nbsp;</span>&nbsp;<span style="color: #212529;">normal</span>&nbsp;<span style="color: #212529;">range</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #c46f01;">referral</span>&nbsp;<span style="color: #212529;">to</span>&nbsp;<span style="color: #212529;">an</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">endocrinologist</span></span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #212529;">placed</span>&nbsp;<span style="color: #212529;">for</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">levels</span>&nbsp;<span style="color: #212529;">were</span>&nbsp;<span style="color: #c46f01;">significently</span>&nbsp;<span style="color: #212529;">above</span>&nbsp;<span style="color: #17a2b8;">the</span>&nbsp;<span style="color: #212529;">normal</span>&nbsp;<span style="color: #212529;">range</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #c46f01;">referal</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #212529;">to</span>&nbsp;<span style="color: #212529;">an</span>&nbsp;<span style="color: #212529;">endocrinologist</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #212529;">placed</span>&nbsp;<span style="color: #212529;">for</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">3</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">specialized</span>&nbsp;<span style="color: #212529;">care</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">specialized</span>&nbsp;<span style="color: #212529;">care</span>&nbsp;</td>
+				        </tr>
+				    </table>
+				</div>		<div class="alignment-container">
+				    <table class="alignment-table">
+				        <colgroup>
+				            <col style="width: 3ch;">
+				            <col style="width: 4ch;">
+				            <col style="width: 100%;">
+				        </colgroup>
+				        <tr>
+				            <th colspan="3">Example 6</th>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">1</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">child</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #c46f01;">admitted</span>&nbsp;<span style="color: #212529;">with</span>&nbsp;<span style="color: #212529;">suspected</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">pneumonia</span></span>&nbsp;<span style="color: #212529;">and</span>&nbsp;<span style="color: #212529;">placed</span>&nbsp;<span style="color: #212529;">on</span>&nbsp;<span style="background-color: #ededed;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;<span class="keyword-box"><span style="color: #c46f01;">intravenous</span></span>&nbsp;<span class="keyword-box"><span style="color: #212529;">amoxicillin</span></span>&nbsp;<span style="color: #212529;">chest</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">child</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #c46f01;">admited</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #212529;">with</span>&nbsp;<span style="color: #212529;">suspected</span>&nbsp;<span style="color: #212529;">pneumonia</span>&nbsp;<span style="color: #212529;">and</span>&nbsp;<span style="color: #212529;">placed</span>&nbsp;<span style="color: #212529;">on</span>&nbsp;<span style="color: #17a2b8;">intra</span>&nbsp;<span style="color: #c46f01;">venous</span><span style="background-color: #ededed;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;<span style="color: #212529;">amoxicillin</span>&nbsp;<span style="color: #212529;">chest</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">2</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">imaging</span>&nbsp;<span style="color: #212529;">confirmed</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">bilateral</span>&nbsp;<span style="color: #212529;">infiltrates</span></span>&nbsp;<span style="color: #212529;">in</span>&nbsp;<span style="color: #dc3545;">the</span>&nbsp;<span style="color: #212529;">lower</span>&nbsp;<span style="color: #212529;">lobes</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">oxygen</span>&nbsp;<span style="color: #212529;">saturation</span></span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #c46f01;">monitored</span>&nbsp;<span style="color: #212529;">closely</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">imaging</span>&nbsp;<span style="color: #212529;">confirmed</span>&nbsp;<span style="color: #212529;">bilateral</span>&nbsp;<span style="color: #212529;">infiltrates</span>&nbsp;<span style="color: #212529;">in</span>&nbsp;<span style="background-color: #ededed;">&nbsp;&nbsp;&nbsp;</span>&nbsp;<span style="color: #212529;">lower</span>&nbsp;<span style="color: #212529;">lobes</span>&nbsp;<span style="color: #212529;">oxygen</span>&nbsp;<span style="color: #212529;">saturation</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #c46f01;">monitered</span>&nbsp;<span style="color: #212529;">closely</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">3</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">throughout</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">night</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">throughout</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">night</span>&nbsp;</td>
+				        </tr>
+				    </table>
+				</div>		<div class="alignment-container">
+				    <table class="alignment-table">
+				        <colgroup>
+				            <col style="width: 3ch;">
+				            <col style="width: 4ch;">
+				            <col style="width: 100%;">
+				        </colgroup>
+				        <tr>
+				            <th colspan="3">Example 7</th>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">1</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">during</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">preoperative</span>&nbsp;<span style="color: #c46f01;">assessment</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">anesthesia</span></span>&nbsp;<span style="color: #212529;">team</span>&nbsp;<span style="color: #212529;">noted</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">history</span>&nbsp;<span style="color: #212529;">of</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">tachycardia</span></span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">during</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">preoperative</span>&nbsp;<span style="color: #c46f01;">assesment</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">anesthesia</span>&nbsp;<span style="color: #212529;">team</span>&nbsp;<span style="color: #212529;">noted</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">history</span>&nbsp;<span style="color: #212529;">of</span>&nbsp;<span style="color: #212529;">tachycardia</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">2</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">was</span>&nbsp;<span style="color: #212529;">cleared</span>&nbsp;<span style="color: #212529;">for</span>&nbsp;<span style="color: #212529;">surgery</span>&nbsp;<span style="color: #212529;">after</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">cardiology</span>&nbsp;<span style="color: #c46f01;">consultation</span>&nbsp;<span style="color: #212529;">general</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">anesthesia</span></span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #c46f01;">administered</span>&nbsp;<span style="color: #212529;">without</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">was</span>&nbsp;<span style="color: #212529;">cleared</span>&nbsp;<span style="color: #212529;">for</span>&nbsp;<span style="color: #212529;">surgery</span>&nbsp;<span style="color: #212529;">after</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">cardiology</span>&nbsp;<span style="color: #c46f01;">consulation</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #212529;">general</span>&nbsp;<span style="color: #212529;">anesthesia</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #c46f01;">administed</span><span style="background-color: #ededed;">&nbsp;&nbsp;</span>&nbsp;<span style="color: #212529;">without</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">3</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">incident</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">incident</span>&nbsp;</td>
+				        </tr>
+				    </table>
+				</div>		<div class="alignment-container">
+				    <table class="alignment-table">
+				        <colgroup>
+				            <col style="width: 3ch;">
+				            <col style="width: 4ch;">
+				            <col style="width: 100%;">
+				        </colgroup>
+				        <tr>
+				            <th colspan="3">Example 8</th>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">1</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">underwent</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">dialysis</span></span>&nbsp;<span style="color: #212529;">three</span>&nbsp;<span style="color: #212529;">times</span>&nbsp;<span style="color: #212529;">per</span>&nbsp;<span style="color: #212529;">week</span>&nbsp;<span style="color: #212529;">due</span>&nbsp;<span style="color: #212529;">to</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">chronic</span>&nbsp;<span style="color: #212529;">kidney</span>&nbsp;<span style="color: #212529;">disease</span></span>&nbsp;<span style="color: #212529;">recent</span>&nbsp;<span style="color: #212529;">lab</span>&nbsp;<span style="color: #212529;">work</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">underwent</span>&nbsp;<span style="color: #212529;">dialysis</span>&nbsp;<span style="color: #212529;">three</span>&nbsp;<span style="color: #212529;">times</span>&nbsp;<span style="color: #212529;">per</span>&nbsp;<span style="color: #212529;">week</span>&nbsp;<span style="color: #212529;">due</span>&nbsp;<span style="color: #212529;">to</span>&nbsp;<span style="color: #212529;">chronic</span>&nbsp;<span style="color: #212529;">kidney</span>&nbsp;<span style="color: #212529;">disease</span>&nbsp;<span style="color: #212529;">recent</span>&nbsp;<span style="color: #212529;">lab</span>&nbsp;<span style="color: #212529;">work</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">2</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">showed</span>&nbsp;<span style="color: #212529;">improved</span>&nbsp;<span class="keyword-box"><span style="color: #c46f01;">hemoglobin</span></span>&nbsp;<span style="color: #c46f01;">levels</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #212529;">after</span>&nbsp;<span style="color: #212529;">an</span>&nbsp;<span style="color: #c46f01;">adjustment</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #212529;">in</span>&nbsp;<span style="color: #212529;">medication</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">nephrologist</span></span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #c46f01;">satisfied</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">showed</span>&nbsp;<span style="color: #212529;">improved</span>&nbsp;<span style="color: #c46f01;">hemoglobi</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #c46f01;">nlevels</span>&nbsp;<span style="color: #212529;">after</span>&nbsp;<span style="color: #212529;">an</span>&nbsp;<span style="color: #c46f01;">adjustement</span>&nbsp;<span style="color: #212529;">in</span>&nbsp;<span style="color: #212529;">medication</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">nephrologist</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #c46f01;">satisfyed</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">3</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">with</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">current</span>&nbsp;<span style="color: #212529;">treatment</span>&nbsp;<span style="color: #212529;">plan</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">with</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">current</span>&nbsp;<span style="color: #212529;">treatment</span>&nbsp;<span style="color: #212529;">plan</span>&nbsp;</td>
+				        </tr>
+				    </table>
+				</div>		<div class="alignment-container">
+				    <table class="alignment-table">
+				        <colgroup>
+				            <col style="width: 3ch;">
+				            <col style="width: 4ch;">
+				            <col style="width: 100%;">
+				        </colgroup>
+				        <tr>
+				            <th colspan="3">Example 9</th>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">1</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">routine</span>&nbsp;<span style="color: #212529;">screening</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">colonoscopy</span></span>&nbsp;<span style="color: #212529;">revealed</span>&nbsp;<span style="color: #212529;">two</span>&nbsp;<span style="color: #212529;">small</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">polyps</span></span>&nbsp;<span style="color: #212529;">which</span>&nbsp;<span style="color: #212529;">were</span>&nbsp;<span style="color: #212529;">removed</span>&nbsp;<span style="color: #212529;">during</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">procedure</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">routine</span>&nbsp;<span style="color: #212529;">screening</span>&nbsp;<span style="color: #212529;">colonoscopy</span>&nbsp;<span style="color: #212529;">revealed</span>&nbsp;<span style="color: #212529;">two</span>&nbsp;<span style="color: #212529;">small</span>&nbsp;<span style="color: #212529;">polyps</span>&nbsp;<span style="color: #212529;">which</span>&nbsp;<span style="color: #212529;">were</span>&nbsp;<span style="color: #212529;">removed</span>&nbsp;<span style="color: #212529;">during</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">procedure</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">2</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span class="keyword-box"><span style="color: #212529;">biopsy</span></span>&nbsp;<span style="color: #212529;">results</span>&nbsp;<span style="color: #212529;">are</span>&nbsp;<span style="color: #212529;">pending</span>&nbsp;<span style="color: #212529;">and</span>&nbsp;<span style="color: #dc3545;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">will</span>&nbsp;<span style="color: #212529;">be</span>&nbsp;<span style="color: #c46f01;">notified</span>&nbsp;<span style="color: #212529;">within</span>&nbsp;<span style="color: #212529;">five</span>&nbsp;<span style="color: #212529;">business</span>&nbsp;<span style="color: #212529;">days</span>&nbsp;<span style="color: #212529;">no</span>&nbsp;<span style="color: #212529;">signs</span>&nbsp;<span style="color: #212529;">of</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">biopsy</span>&nbsp;<span style="color: #212529;">results</span>&nbsp;<span style="color: #212529;">are</span>&nbsp;<span style="color: #212529;">pending</span>&nbsp;<span style="color: #212529;">and</span>&nbsp;<span style="background-color: #ededed;">&nbsp;&nbsp;&nbsp;</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">will</span>&nbsp;<span style="color: #212529;">be</span>&nbsp;<span style="color: #c46f01;">notifyed</span>&nbsp;<span style="color: #212529;">within</span>&nbsp;<span style="color: #212529;">five</span>&nbsp;<span style="color: #212529;">business</span>&nbsp;<span style="color: #212529;">days</span>&nbsp;<span style="color: #212529;">no</span>&nbsp;<span style="color: #212529;">signs</span>&nbsp;<span style="color: #212529;">of</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">3</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span class="keyword-box"><span style="color: #212529;">malignancy</span></span>&nbsp;<span style="color: #212529;">were</span>&nbsp;<span style="color: #c46f01;">observed</span>&nbsp;<span style="color: #212529;">during</span>&nbsp;<span style="background-color: #ededed;">&nbsp;&nbsp;&nbsp;</span>&nbsp;<span style="color: #212529;">visual</span>&nbsp;<span style="color: #212529;">inspection</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">malignancy</span>&nbsp;<span style="color: #212529;">were</span>&nbsp;<span style="color: #c46f01;">observd</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #212529;">during</span>&nbsp;<span style="color: #17a2b8;">the</span>&nbsp;<span style="color: #212529;">visual</span>&nbsp;<span style="color: #212529;">inspection</span>&nbsp;</td>
+				        </tr>
+				    </table>
+				</div>		<div class="alignment-container">
+				    <table class="alignment-table">
+				        <colgroup>
+				            <col style="width: 3ch;">
+				            <col style="width: 4ch;">
+				            <col style="width: 100%;">
+				        </colgroup>
+				        <tr>
+				            <th colspan="3">Example 10</th>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">1</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span class="keyword-box"><span style="color: #212529;">blood</span>&nbsp;<span style="color: #c46f01;">pressure</span></span>&nbsp;<span style="color: #212529;">readings</span>&nbsp;<span style="color: #212529;">confirmed</span>&nbsp;<span style="color: #c46f01;">persistent</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">hypertension</span></span>&nbsp;<span style="color: #212529;">despite</span>&nbsp;<span style="color: #212529;">current</span>&nbsp;<span style="color: #212529;">medication</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">physician</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">blood</span>&nbsp;<span style="color: #c46f01;">presure</span><span style="background-color: #ededed;">&nbsp;</span>&nbsp;<span style="color: #212529;">readings</span>&nbsp;<span style="color: #212529;">confirmed</span>&nbsp;<span style="color: #c46f01;">persistant</span>&nbsp;<span style="color: #212529;">hypertension</span>&nbsp;<span style="color: #212529;">despite</span>&nbsp;<span style="color: #212529;">current</span>&nbsp;<span style="color: #212529;">medication</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">physician</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">2</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">added</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">low</span>&nbsp;<span style="color: #212529;">dose</span>&nbsp;<span style="color: #212529;">of</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">metformin</span></span>&nbsp;<span style="color: #212529;">after</span>&nbsp;<span style="color: #212529;">discovering</span>&nbsp;<span style="color: #212529;">elevated</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">fasting</span>&nbsp;<span style="color: #212529;">glucose</span></span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #212529;">advised</span>&nbsp;<span style="color: #212529;">to</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">added</span>&nbsp;<span style="color: #212529;">a</span>&nbsp;<span style="color: #212529;">low</span>&nbsp;<span style="color: #212529;">dose</span>&nbsp;<span style="color: #212529;">of</span>&nbsp;<span style="color: #212529;">metformin</span>&nbsp;<span style="color: #212529;">after</span>&nbsp;<span style="color: #212529;">discovering</span>&nbsp;<span style="color: #212529;">elevated</span>&nbsp;<span style="color: #212529;">fasting</span>&nbsp;<span style="color: #212529;">glucose</span>&nbsp;<span style="color: #212529;">the</span>&nbsp;<span style="color: #212529;">patient</span>&nbsp;<span style="color: #212529;">was</span>&nbsp;<span style="color: #212529;">advised</span>&nbsp;<span style="color: #212529;">to</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines">3</td>
+				            <td class="alignment-table-names">Ref.</td>
+				            <td><span style="color: #212529;">reduce</span>&nbsp;<span class="keyword-box"><span style="color: #212529;">sodium</span></span>&nbsp;<span style="color: #212529;">intake</span>&nbsp;<span style="color: #212529;">and</span>&nbsp;<span style="color: #212529;">increase</span>&nbsp;<span style="color: #212529;">physical</span>&nbsp;<span style="color: #212529;">activity</span>&nbsp;</td>
+				        </tr>
+				        <tr class="alignment-row">
+				            <td class="alignment-table-lines"></td>
+				            <td class="alignment-table-names">Gen.</td>
+				            <td><span style="color: #212529;">reduce</span>&nbsp;<span style="color: #212529;">sodium</span>&nbsp;<span style="color: #212529;">intake</span>&nbsp;<span style="color: #212529;">and</span>&nbsp;<span style="color: #212529;">increase</span>&nbsp;<span style="color: #212529;">physical</span>&nbsp;<span style="color: #212529;">activity</span>&nbsp;</td>
+				        </tr>
+				    </table>
+				</div>
+		</div>
+
+
+</body>
+</html>
