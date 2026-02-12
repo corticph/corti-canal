@@ -179,4 +179,4 @@ Words are color-coded to show the alignment result:
 <tr><td>Blue box</td><td><strong>Medical Term</strong></td><td>Indicates a designated medical term for tracking recall. Only shown when the <code>--medical-terms</code> option is used.</td></tr>
 </table>
 
-This visualization makes it easy to spot patterns -- for example, if the model consistently misspells certain medical terms (substitutions) or drops words at the end of sentences (deletions).
+This visualization makes it easy to spot patterns -- for example, if the model consistently misspells certain medical terms or drops words at the end of sentences.
