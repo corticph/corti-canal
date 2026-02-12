@@ -46,14 +46,14 @@ testing = ["jaraco.test", "pytest (!=8.0.*)", "pytest (>=6,!=8.1.*)", "pytest-ch
 
 [[package]]
 name = "bewer"
-version = "0.1.0.dev20260211161223"
+version = "0.1.0a5"
 description = "Evaluation and analysis framework for automatic speech recognition in Python."
 optional = false
 python-versions = "<3.15,>=3.10"
 groups = ["main"]
 files = [
-    {file = "bewer-0.1.0.dev20260211161223-py3-none-any.whl", hash = "sha256:9c7c6358e5ffd59b79f0184735d504f09875c1003f22fe8e7fe4644fb370dceb"},
-    {file = "bewer-0.1.0.dev20260211161223.tar.gz", hash = "sha256:97ba08789f8c63693c1037d4bc0600b268fa0f8c8f1b887703544bc1eb8731d7"},
+    {file = "bewer-0.1.0a5-py3-none-any.whl", hash = "sha256:f62a300882e7caf59aed1e07c3f8bbf5c22357ed0e908d1cdf48f037c8c821cc"},
+    {file = "bewer-0.1.0a5.tar.gz", hash = "sha256:8601532e38396272a127faf47f57d63047454155acdee3cd5bad8cc18443831b"},
 ]
 
 [package.dependencies]
@@ -69,11 +69,6 @@ rapidfuzz = ">=3.0.0"
 regex = ">=2024.0.0"
 rich = ">=13.0.0"
 unidecode = ">=1.3.0"
-
-[package.source]
-type = "legacy"
-url = "https://test.pypi.org/simple"
-reference = "test-pypi"
 
 [[package]]
 name = "build"
@@ -2724,4 +2719,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.15"
-content-hash = "a9a24f85ccfd38b820af47917e7071d5bde64c267bc93eb74c6795ecf6cc0663"
+content-hash = "8f428ef5f57c391493e8d3062e5cbe61b3a6c5ff3ab5dfe0db83ad269d66ccaf"

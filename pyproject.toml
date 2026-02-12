@@ -27,7 +27,7 @@ classifiers = [
 ]
 dependencies = [
     "rich-click>=1.9.5",
-    "bewer==0.1.0.dev20260211161223",
+    "bewer==0.1.0a5",
 ]
 
 [project.scripts]
@@ -40,10 +40,6 @@ name = "corti-canal"
 version = "0.0.0"  # Placeholder for Poetry; actual version is managed by hatch-vcs
 packages = [{ include = "corti_canal", from = "src" }]
 
-[[tool.poetry.source]]
-name = "test-pypi"
-url = "https://test.pypi.org/simple/"
-priority = "supplemental"
 
 # --- Hatch configuration ---
 
