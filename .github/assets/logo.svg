@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120">
+  <style>
+    text {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 48px;
+      font-weight: bold;
+    }
+  </style>
+
+  <!-- Centered group: 6 chars + gap, ~28.8px per char -->
+  <g transform="translate(180, 60)">
+    <!-- Line 1: "Corti" + gap + grey space -->
+    <text x="-89" y="-10" text-anchor="start" fill="#333333">Corti</text>
+    <rect x="58" y="-46" width="28.8" height="48" rx="2" fill="#D0D0D0"/>
+
+    <!-- Line 2: grey space + gap + "Canal" -->
+    <rect x="-86.8" y="2" width="28.8" height="48" rx="2" fill="#D0D0D0"/>
+    <text x="-54" y="38" text-anchor="start" fill="#333333">Canal</text>
+  </g>
+</svg>

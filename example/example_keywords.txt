@@ -1,0 +1,33 @@
+hypertension
+insulin
+MRI
+colonoscopy
+amoxicillin
+fracture
+hemoglobin
+ibuprofen
+anesthesia
+tachycardia
+cholesterol
+metformin
+dialysis
+biopsy
+pneumonia
+anemia
+inflammation
+polyps
+malignancy
+endocrinologist
+nephrologist
+intravenous
+X-ray
+sodium
+blood sugar
+blood pressure
+blood test
+chronic kidney disease
+oxygen saturation
+Hemoglobin A1C
+fasting glucose
+bilateral infiltrates
+type two diabetes
