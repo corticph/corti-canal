@@ -4,7 +4,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-%203.10%20|%203.11%20|%203.12%20|%203.13|%203.14-green" alt="Python Versions">
-  <img src="https://codecov.io/gh/corticph/corti-canal/graph/badge.svg?token=JLBKYSEIQ6" alt="Coverage" style="margin-left:5px;">
+  <img src="https://codecov.io/gh/corticph/corti-canal/graph/badge.svg" alt="Coverage" style="margin-left:5px;">
   <img src="https://img.shields.io/pypi/v/corti-canal.svg" alt="PyPI" style="margin-left:5px;">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" style="margin-left:5px;">
 </p>
