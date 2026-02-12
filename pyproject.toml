@@ -28,6 +28,7 @@ classifiers = [
 dependencies = [
     "rich-click>=1.9.5",
     "bewer==0.1.0a5",
+    "pandas>=2.0.0",
 ]
 
 [project.scripts]

@@ -174,15 +174,14 @@ def report(
         hyp_col=gen_col,
     )
 
-    # With a small emoji check mark, indicate that the dataset was loaded successfully and show the number of examples
-    click.echo(f"✅ Successfully loaded dataset with {len(dataset)} examples.")
+    click.echo(click.style("✓", fg="green") + f" Successfully loaded {len(dataset)} examples.")
 
     if medical_terms is not None:
         with open(medical_terms, "r") as f:
             keyword_list = [kw.strip() for kw in f.read().strip().splitlines()]
         dataset.add_keyword_list("medical_terms", keyword_list)
         report_metrics = REPORT_METRICS + [MEDICAL_TERM_RECALL]
-        click.echo(f"✅ Successfully loaded medical terms list with {len(keyword_list)} terms.")
+        click.echo(click.style("✓", fg="green") + f" Successfully loaded {len(keyword_list)} medical terms.")
     else:
         report_metrics = REPORT_METRICS
 
@@ -195,4 +194,4 @@ def report(
         report_metrics=report_metrics,
         report_summary=REPORT_SUMMARY_ITEMS,
     )
-    click.echo(f"✅ Report generated successfully at '{output_path.absolute()}'.\n")
+    click.echo(click.style("✓", fg="green") + f" Report generated at '{output_path.absolute()}'.\n")
