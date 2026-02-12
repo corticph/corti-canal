@@ -146,3 +146,6 @@ tests/reports
 
 # MacOS
 .DS_Store
+
+# canal report output
+canal-report-*.html
