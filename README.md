@@ -79,18 +79,19 @@ Use `canal report --help` to view the full command description and available opt
 ### Options
 
 <table>
-<colgroup>
-  <col width="170">
-  <col width="250">
-  <col>
-</colgroup>
-<tr><th>Option</th><th>Default</th><th>Description</th></tr>
-<tr><td><code>--output-path</code></td><td><code>canal-report-{time}.html</code></td><td>Path for the generated report. When omitted, a timestamped filename is created in the current directory (e.g. <code>canal-report-20251224-173020.html</code>).</td></tr>
-<tr><td><code>--ref-col</code></td><td><code>ref</code></td><td>Name of the CSV column containing the ground-truth <strong>reference</strong> transcripts.</td></tr>
-<tr><td><code>--gen-col</code></td><td><code>gen</code></td><td>Name of the CSV column containing the model-<strong>generated</strong> transcripts.</td></tr>
-<tr><td><code>--medical-terms</code></td><td><em>None</em></td><td>Path to a file containing medical terms (one per line) used to compute the Medical Term Recall metric. If not provided, Medical Term Recall will not be computed.</td></tr>
-<tr><td><code>--alignment-type</code></td><td><code>lv</code></td><td>Algorithm used to align reference and hypothesis words. <code>lv</code> (Levenshtein) is a conventional word-level alignment used for metrics like WER and CER. <code>ea</code> (ErrorAlign) is a more advanced algorithm that aligns words closer to the way a human reader would.</td></tr>
-<tr><td><code>--overwrite</code></td><td><code>False</code></td><td>Allow overwriting an existing report file. Without this flag, Canal will refuse to write over an existing file.</td></tr>
+<tr><th>Option</th><th>Default</th></tr>
+<tr><td><code>--output-path</code></td><td><code>canal-report-{time}.html</code></td></tr>
+<tr><td colspan="2">Path for the generated report. Defaults to a timestamped file in the current directory (e.g., <code>canal-report-20251224-173020.html</code>).</td></tr>
+<tr><td><code>--ref-col</code></td><td><code>ref</code></td></tr>
+<tr><td colspan="2">Name of the CSV column containing the ground-truth <strong>reference</strong> transcripts.</td></tr>
+<tr><td><code>--gen-col</code></td><td><code>gen</code></td></tr>
+<tr><td colspan="2">Name of the CSV column containing the model-<strong>generated</strong> transcripts.</td></tr>
+<tr><td><code>--medical-terms</code></td><td><code>None</code></td></tr>
+<tr><td colspan="2">Path to a file containing medical terms (one per line) used to compute the Medical Term Recall metric. If not provided, Medical Term Recall will not be computed.</td></tr>
+<tr><td><code>--alignment-type</code></td><td><code>lv</code></td></tr>
+<tr><td colspan="2">Algorithm used to align reference and hypothesis words. <code>lv</code> (Levenshtein) is a conventional word-level alignment used for metrics like WER and CER. <code>ea</code> (ErrorAlign) is a more advanced algorithm that aligns words closer to the way a human reader would.</td></tr>
+<tr><td><code>--overwrite</code></td><td><code>False</code></td></tr>
+<tr><td colspan="2">Allow overwriting an existing report file. Without this flag, Canal will refuse to write over an existing file.</td></tr>
 </table>
 
 ### Example
