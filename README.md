@@ -19,6 +19,11 @@
 
 Canal is a command-line tool that helps you measure how well a speech-recognition model is performing. Give it a CSV with the correct transcripts alongside the model-generated output, and it produces a self-contained HTML report with overall accuracy metrics and a word-by-word comparison so you can see exactly where the model gets things right — and where it doesn't.
 
+<br>
+
+<img src="https://raw.githubusercontent.com/corticph/corti-canal/refs/heads/main/.github/assets/report_preview.png" alt="Report Preview" width="100%">
+
+<br>
 
 ## Installation
 
