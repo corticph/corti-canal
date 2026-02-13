@@ -21,7 +21,9 @@ Canal is a command-line tool that helps you measure how well a speech-recognitio
 
 <br>
 
-<img src="https://raw.githubusercontent.com/corticph/corti-canal/refs/heads/main/.github/assets/report_preview.png" alt="Report Preview" width="100%">
+<a href="https://corticph.github.io/corti-canal/">
+  <img src="https://raw.githubusercontent.com/corticph/corti-canal/refs/heads/main/.github/assets/report_preview.png" alt="Report Preview" width="100%">
+</a>
 
 <br>
 
