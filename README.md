@@ -21,7 +21,7 @@ Canal is a command-line tool that helps you measure how well a speech-recognitio
 
 <br>
 
-<img src=".github/assets/report_preview.png" alt="Report Preview" width="100%">
+<img src=".github/assets/report_preview_v2.png" alt="Report Preview" width="100%">
 
 <br>
 
