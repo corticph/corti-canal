@@ -14,7 +14,7 @@
       <a href="#usage">Usage</a> &bull;
       <a href="#understanding-the-report">Understanding the Report</a> &bull;
       <a href="#normalization">Normalization</a> &bull;
-      <a href="#known-limitations">Known Limitations</a>
+      <a href="#limitations">Limitations</a>
 </p>
 
 ---
