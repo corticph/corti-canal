@@ -181,7 +181,7 @@ def report(
         ref_col=ref_col,
         hyp_col=gen_col,
     )
-    # import IPython; IPython.embed(using=False)  # DEBUG
+
     click.echo(click.style("✓", fg="green") + f" Successfully loaded {len(dataset)} examples.")
 
     use_normalization = not disable_normalization
