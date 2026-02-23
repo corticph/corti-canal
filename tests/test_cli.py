@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from corti_canal.cli.main import MEDICAL_TERM_RECALL, REPORT_METRICS, cli
+from corti_canal.cli.main import cli
 
 
 def _write_csv(path, columns=("ref", "gen")):
@@ -25,7 +25,7 @@ def test_report_default_options(mock_dataset_cls, mock_generate_report, tmp_path
     instance.load_csv.assert_called_once_with(csv_path, ref_col="ref", hyp_col="gen")
 
     call_kwargs = mock_generate_report.call_args[1]
-    assert call_kwargs["alignment_type"] == "levenshtein"
+    assert call_kwargs["report_alignment"].name == "levenshtein"
     assert str(call_kwargs["path"]).startswith("canal-report-")
     assert str(call_kwargs["path"]).endswith(".html")
 
@@ -61,7 +61,8 @@ def test_report_with_medical_terms(mock_dataset_cls, mock_generate_report, tmp_p
     instance.add_keyword_list.assert_called_once_with("medical_terms", ["hypertension", "diabetes"])
 
     call_kwargs = mock_generate_report.call_args[1]
-    assert MEDICAL_TERM_RECALL in call_kwargs["report_metrics"]
+    metric_names = [m.name for m in call_kwargs["report_metrics"]]
+    assert "mtr" in metric_names
 
 
 @patch("corti_canal.cli.main.generate_report")
@@ -79,8 +80,43 @@ def test_report_without_medical_terms(mock_dataset_cls, mock_generate_report, tm
     instance.add_keyword_list.assert_not_called()
 
     call_kwargs = mock_generate_report.call_args[1]
-    assert call_kwargs["report_metrics"] == REPORT_METRICS
-    assert MEDICAL_TERM_RECALL not in call_kwargs["report_metrics"]
+    metric_names = [m.name for m in call_kwargs["report_metrics"]]
+    assert metric_names == ["wer", "cer"]
+    assert "mtr" not in metric_names
+
+
+@patch("corti_canal.cli.main.generate_report")
+@patch("corti_canal.cli.main.Dataset")
+def test_report_normalization_enabled_by_default(mock_dataset_cls, mock_generate_report, tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(csv_path)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["report", str(csv_path)])
+
+    assert result.exit_code == 0
+
+    call_kwargs = mock_generate_report.call_args[1]
+    for metric in call_kwargs["report_metrics"]:
+        assert metric.metric_kwargs["normalized"] is True
+    assert call_kwargs["report_alignment"].metric_kwargs["normalized"] is True
+
+
+@patch("corti_canal.cli.main.generate_report")
+@patch("corti_canal.cli.main.Dataset")
+def test_report_disable_normalization(mock_dataset_cls, mock_generate_report, tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(csv_path)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["report", "--disable-normalization", str(csv_path)])
+
+    assert result.exit_code == 0
+
+    call_kwargs = mock_generate_report.call_args[1]
+    for metric in call_kwargs["report_metrics"]:
+        assert metric.metric_kwargs["normalized"] is False
+    assert call_kwargs["report_alignment"].metric_kwargs["normalized"] is False
 
 
 @patch("corti_canal.cli.main.generate_report")
@@ -95,7 +131,7 @@ def test_report_alignment_type_ea(mock_dataset_cls, mock_generate_report, tmp_pa
     assert result.exit_code == 0
 
     call_kwargs = mock_generate_report.call_args[1]
-    assert call_kwargs["alignment_type"] == "error_align"
+    assert call_kwargs["report_alignment"].name == "error_align"
 
 
 @patch("corti_canal.cli.main.generate_report")

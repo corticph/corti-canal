@@ -6,14 +6,7 @@ import pandas as pd
 import rich_click as click
 from bewer import Dataset
 from bewer.reporting.html.labels import HTMLAlignmentLabels
-from bewer.reporting.html.report import ReportMetric, ReportSummaryItem, generate_report
-
-REPORT_METRICS = [
-    ReportMetric("wer"),
-    ReportMetric("cer"),
-]
-
-MEDICAL_TERM_RECALL = ReportMetric("legacy_medical_word_accuracy", label="Medical Term Recall")
+from bewer.reporting.html.report import ReportAlignment, ReportMetric, ReportSummaryItem, generate_report
 
 REPORT_SUMMARY_ITEMS = [
     ReportSummaryItem("num_examples", label="Number of examples"),
@@ -90,8 +83,17 @@ def cli():
     type=Path,
     default=None,
     help=(
-        "Path to a file containing medical terms used to compute the Medical Term Recall metric. The file should "
-        "have one term per line. If not provided, the Medical Term Recall metric will not be computed."
+        "Path to a file containing medical terms used to compute the medical term recall metric. The file should "
+        "have one term per line. If not provided, the medical term recall metric will not be computed."
+    ),
+)
+@click.option(
+    "--disable-normalization",
+    is_flag=True,
+    default=False,
+    help=(
+        "Disable text normalization before computing metrics. Basic normalization includes lowercasing and removing "
+        "punctuation and diacritics."
     ),
 )
 @click.option(
@@ -122,6 +124,7 @@ def report(
     ref_col: str,
     gen_col: str,
     medical_terms: Path | None,
+    disable_normalization: bool,
     alignment_type: str,
     overwrite: bool,
     output_path: Optional[Path],
@@ -167,31 +170,49 @@ def report(
         )
         raise click.Abort()
 
+    metadata = {
+        "Normalization": "Enabled" if not disable_normalization else "Disabled",
+        "Alignment method": "Levenshtein" if alignment_type == "lv" else "ErrorAlign",
+    }
+
     dataset = Dataset()
     dataset.load_csv(
         input_path,
         ref_col=ref_col,
         hyp_col=gen_col,
     )
-
+    # import IPython; IPython.embed(using=False)  # DEBUG
     click.echo(click.style("✓", fg="green") + f" Successfully loaded {len(dataset)} examples.")
+
+    use_normalization = not disable_normalization
+
+    report_metrics = [
+        ReportMetric("wer", label="Word Error Rate", normalized=use_normalization),
+        ReportMetric("cer", label="Character Error Rate", normalized=use_normalization),
+    ]
+    report_alignment = ReportAlignment(ALIGNMENT_TYPE_MAP[alignment_type], normalized=use_normalization)
 
     if medical_terms is not None:
         with open(medical_terms, "r") as f:
             keyword_list = [kw.strip() for kw in f.read().strip().splitlines()]
         dataset.add_keyword_list("medical_terms", keyword_list)
-        report_metrics = REPORT_METRICS + [MEDICAL_TERM_RECALL]
+        report_metrics.append(
+            ReportMetric(
+                "mtr",
+                label="Medical Term Recall",
+                normalized=use_normalization,
+            )
+        )
         click.echo(click.style("✓", fg="green") + f" Successfully loaded {len(keyword_list)} medical terms.")
-    else:
-        report_metrics = REPORT_METRICS
 
     generate_report(
         dataset=dataset,
         path=output_path,
         allow_overwrite=overwrite,
-        alignment_type=ALIGNMENT_TYPE_MAP[alignment_type],
         alignment_labels=LABELS,
+        report_alignment=report_alignment,
         report_metrics=report_metrics,
         report_summary=REPORT_SUMMARY_ITEMS,
+        metadata=metadata,
     )
     click.echo(click.style("✓", fg="green") + f" Report generated at '{output_path.absolute()}'.\n")

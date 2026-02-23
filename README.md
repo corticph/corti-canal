@@ -12,7 +12,9 @@
 <p align="center">
       <a href="#installation">Installation</a> &bull;
       <a href="#usage">Usage</a> &bull;
-      <a href="#understanding-the-report">Understanding the Report</a>
+      <a href="#understanding-the-report">Understanding the Report</a> &bull;
+      <a href="#normalization">Normalization</a> &bull;
+      <a href="#known-limitations">Known Limitations</a>
 </p>
 
 ---
@@ -95,6 +97,8 @@ Use `canal report --help` to view the full command description and available opt
 <tr><td colspan="2">Name of the CSV column containing the model-<strong>generated</strong> transcripts.</td></tr>
 <tr><td><code>--medical-terms</code></td><td><code>None</code></td></tr>
 <tr><td colspan="2">Path to a file containing medical terms (one per line) used to compute the Medical Term Recall metric. If not provided, Medical Term Recall will not be computed.</td></tr>
+<tr><td><code>--disable-normalization</code></td><td><code>False</code></td></tr>
+<tr><td colspan="2">Disable text normalization before computing metrics. Basic normalization includes lowercasing and removing punctuation and diacritics.</td></tr>
 <tr><td><code>--alignment-type</code></td><td><code>lv</code></td></tr>
 <tr><td colspan="2">Algorithm used to align reference and hypothesis words. <code>lv</code> (Levenshtein) is a conventional word-level alignment used for metrics like WER and CER. <code>ea</code> (ErrorAlign) is a more advanced algorithm that aligns words closer to the way a human reader would.</td></tr>
 <tr><td><code>--overwrite</code></td><td><code>False</code></td></tr>
@@ -127,7 +131,7 @@ ref,gen
 
 ## Understanding the Report
 
-> **See it in action:** The [`example/`](example/) folder contains sample input files and a [pre-generated report](example/example_report.html) you can open in your browser.
+> **See it in action:** The [`example/`](example/) folder contains sample input files and a [pre-generated report](https://corticph.github.io/corti-canal/) you can open in your browser.
 
 The generated HTML report is fully self-contained (no external dependencies) and can be opened in any browser. It has two main sections:
 
@@ -187,3 +191,19 @@ Words are color-coded to show the alignment result:
 </table>
 
 This visualization makes it easy to spot patterns -- for example, if the model consistently misspells certain medical terms or drops words at the end of sentences.
+
+## Normalization
+
+By default, Canal normalizes both reference and generated text before computing metrics and alignments. This ensures that superficial differences in casing, punctuation, or accented characters don't inflate error rates. You can disable this with `--disable-normalization`.
+
+The normalization pipeline applies the following steps in order:
+
+1. **Unicode NFC composition** -- Decomposes and recomposes Unicode characters into their canonical composed form (e.g. `e` + combining acute accent becomes `é`).
+2. **Tokenization** -- Splits text into words. Punctuation at the boundaries of words is stripped, while internal punctuation is preserved (e.g. "don't" stays as one token). Hyphens and forward slashes act as word boundaries.
+3. **Lowercasing** -- Converts all characters to lowercase.
+4. **Latin transliteration** -- Converts accented Latin letters to their ASCII equivalents (e.g. `é` → `e`, `ñ` → `n`, `ü` → `u`). Non-Latin scripts (Greek, Cyrillic, etc.) are left unchanged. See [anyascii.com](https://anyascii.com/) for an interactive demo of how this kind of transliteration works.
+
+## Limitations
+
+- **Latin script only.** The normalization pipeline is designed for Latin script languages. Evaluating non-Latin script language data may lead to unexpected results.
+- **Overlapping medical terms are counted multiple times.** If terms in the medical terms list overlap (e.g. "blood" and "blood sugar"), each match is counted independently for Medical Term Recall metric.
