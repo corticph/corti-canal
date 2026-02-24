@@ -128,6 +128,19 @@ ref,gen
 "The colonoscopy revealed no significant abnormalities.","The colonoscopy revealed significant abnormalities."
 ```
 
+### Medical terms format
+
+The medical terms file is a plain text file (e.g., a `.txt` file) with one term per line. Do not include a column header, as this will be interpreted as a medical term. It is used with the `--medical-terms` option to compute the Medical Term Recall (MTR) metric, which measures how many of the listed terms were correctly transcribed.
+
+```
+amoxicillin
+atrial fibrillation
+colonoscopy
+deep vein thrombosis
+hypertension
+...
+```
+
 
 ## Understanding the Report
 
