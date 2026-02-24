@@ -64,6 +64,12 @@ pipx install corti-canal
 
 </details>
 
+To upgrade to the latest version:
+
+```bash
+pipx upgrade corti-canal
+```
+
 ## Usage
 
 ```
