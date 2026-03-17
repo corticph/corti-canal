@@ -46,14 +46,14 @@ testing = ["jaraco.test", "pytest (!=8.0.*)", "pytest (>=6,!=8.1.*)", "pytest-ch
 
 [[package]]
 name = "bewer"
-version = "0.1.0a8"
+version = "0.1.0a9"
 description = "Evaluation and analysis framework for automatic speech recognition in Python."
 optional = false
 python-versions = "<3.15,>=3.10"
 groups = ["main"]
 files = [
-    {file = "bewer-0.1.0a8-py3-none-any.whl", hash = "sha256:040751d74c00dee9d402fa5528439b3998150c30aef177d89dd166f624c1cec9"},
-    {file = "bewer-0.1.0a8.tar.gz", hash = "sha256:f70a3ef9972c643ae9657ef3e6d6e4b7323fee4126db5d0762725f103db70b7b"},
+    {file = "bewer-0.1.0a9-py3-none-any.whl", hash = "sha256:12473fa50773d0f7d6748e3e320beb25a27d7ae66e02cb956e798bcc3d9e2657"},
+    {file = "bewer-0.1.0a9.tar.gz", hash = "sha256:b1836817febbe176a1b4d5ccc00c10c86258a7a3c44280376dbb67e2c0e6c229"},
 ]
 
 [package.dependencies]
@@ -2739,4 +2739,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.15"
-content-hash = "8e5c767215b6d0e7d2d240b0ae68732b8a22db33e02e57cb7c016f8349a4c373"
+content-hash = "cd49f34b55d8fc64ca22a498c9f5286febe4ae42f9753a877efdb9a42b11c8b1"
