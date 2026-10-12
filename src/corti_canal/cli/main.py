@@ -4,17 +4,9 @@ from typing import Optional
 
 import pandas as pd
 import rich_click as click
-from bewer import Dataset
+from bewer import Dataset, Vocabulary
 from bewer.reporting.html.labels import HTMLAlignmentLabels
-from bewer.reporting.html.report import ReportAlignment, ReportMetric, ReportSummaryItem, generate_report
-
-REPORT_SUMMARY_ITEMS = [
-    ReportSummaryItem("num_examples", label="Number of examples"),
-    ReportSummaryItem("num_ref_words", label="Number of reference words"),
-    ReportSummaryItem("num_ref_chars", label="Number of reference characters"),
-    ReportSummaryItem("num_hyp_words", label="Number of generated words"),
-    ReportSummaryItem("num_hyp_chars", label="Number of generated characters"),
-]
+from bewer.reporting.html.report import ReportAlignment, ReportMetric, generate_report
 
 LABELS = HTMLAlignmentLabels()
 
@@ -75,8 +67,12 @@ def cli():
 @click.option(
     "--gen-col",
     type=str,
-    default="gen",
-    help="Name of the CSV column containing the model-generated transcripts.",
+    multiple=True,
+    default=("gen",),
+    help=(
+        "Name of the CSV column containing the model-generated transcripts. Pass multiple times to compare "
+        "multiple hypotheses in the same report (e.g. --gen-col model_a --gen-col model_b)."
+    ),
 )
 @click.option(
     "--medical-terms",
@@ -122,7 +118,7 @@ def cli():
 def report(
     input_path: Path,
     ref_col: str,
-    gen_col: str,
+    gen_col: tuple[str, ...],
     medical_terms: Path | None,
     disable_normalization: bool,
     alignment_type: str,
@@ -144,8 +140,12 @@ def report(
         click.echo(f"Error: Medical terms file '{medical_terms.absolute()}' does not exist.", err=True)
         raise click.Abort()
 
-    if ref_col == gen_col:
+    if ref_col in gen_col:
         click.echo("Error: --ref-col and --gen-col cannot be the same column.", err=True)
+        raise click.Abort()
+
+    if len(gen_col) != len(set(gen_col)):
+        click.echo("Error: --gen-col values must be unique.", err=True)
         raise click.Abort()
 
     try:
@@ -162,57 +162,69 @@ def report(
         )
         raise click.Abort()
 
-    if gen_col not in df.columns:
-        col_names = ", ".join(df.columns)
-        click.echo(
-            f"Error: --gen-col '{gen_col}' is not a valid column in the input CSV. Available columns: {col_names}",
-            err=True,
-        )
-        raise click.Abort()
+    for col in gen_col:
+        if col not in df.columns:
+            col_names = ", ".join(df.columns)
+            click.echo(
+                f"Error: --gen-col '{col}' is not a valid column in the input CSV. Available columns: {col_names}",
+                err=True,
+            )
+            raise click.Abort()
 
     metadata = {
         "Normalization": "Enabled" if not disable_normalization else "Disabled",
         "Alignment method": "Levenshtein" if alignment_type == "lv" else "ErrorAlign",
     }
 
-    dataset = Dataset()
-    dataset.load_csv(
-        input_path,
-        ref_col=ref_col,
-        hyp_col=gen_col,
-    )
-
-    click.echo(click.style("✓", fg="green") + f" Successfully loaded {len(dataset)} examples.")
-
     use_normalization = not disable_normalization
+
+    vocab: Vocabulary | None = None
+    if medical_terms is not None:
+        with open(medical_terms, "r") as f:
+            keyword_list = [kw.strip() for kw in f.read().strip().splitlines()]
+        vocab = Vocabulary("medical_terms")
+        vocab.add_terms(keyword_list)
+        click.echo(click.style("✓", fg="green") + f" Successfully loaded {len(keyword_list)} medical terms.")
+
+    datasets: dict[str, Dataset] = {}
+    for col in gen_col:
+        ds = Dataset()
+        ds.load_csv(
+            input_path,
+            ref_col=ref_col,
+            hyp_col=col,
+        )
+        if vocab is not None:
+            ds.add_vocabulary(vocab)
+        datasets[col] = ds
+        click.echo(click.style("✓", fg="green") + f" Successfully loaded {len(ds)} examples from column '{col}'.")
 
     report_metrics = [
         ReportMetric("wer", label="Word Error Rate", normalized=use_normalization),
         ReportMetric("cer", label="Character Error Rate", normalized=use_normalization),
+        ReportMetric("per", label="Punctuation Error Rate", normalized=use_normalization),
     ]
     report_alignment = ReportAlignment(ALIGNMENT_TYPE_MAP[alignment_type], normalized=use_normalization)
 
-    if medical_terms is not None:
-        with open(medical_terms, "r") as f:
-            keyword_list = [kw.strip() for kw in f.read().strip().splitlines()]
-        dataset.add_keyword_list("medical_terms", keyword_list)
+    if vocab is not None:
         report_metrics.append(
             ReportMetric(
-                "mtr",
+                "ktr",
                 label="Medical Term Recall",
+                vocab="medical_terms",
                 normalized=use_normalization,
             )
         )
-        click.echo(click.style("✓", fg="green") + f" Successfully loaded {len(keyword_list)} medical terms.")
+
+    report_dataset = datasets[gen_col[0]] if len(datasets) == 1 else datasets
 
     generate_report(
-        dataset=dataset,
+        dataset=report_dataset,
         path=output_path,
         allow_overwrite=overwrite,
         alignment_labels=LABELS,
         report_alignment=report_alignment,
         report_metrics=report_metrics,
-        report_summary=REPORT_SUMMARY_ITEMS,
         metadata=metadata,
     )
     click.echo(click.style("✓", fg="green") + f" Report generated at '{output_path.absolute()}'.\n")

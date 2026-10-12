@@ -12,7 +12,8 @@ def _write_csv(path, columns=("ref", "gen")):
 
 @patch("corti_canal.cli.main.generate_report")
 @patch("corti_canal.cli.main.Dataset")
-def test_report_default_options(mock_dataset_cls, mock_generate_report, tmp_path):
+@patch("corti_canal.cli.main.Vocabulary")
+def test_report_default_options(mock_vocab_cls, mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
     _write_csv(csv_path)
 
@@ -32,7 +33,8 @@ def test_report_default_options(mock_dataset_cls, mock_generate_report, tmp_path
 
 @patch("corti_canal.cli.main.generate_report")
 @patch("corti_canal.cli.main.Dataset")
-def test_report_custom_columns(mock_dataset_cls, mock_generate_report, tmp_path):
+@patch("corti_canal.cli.main.Vocabulary")
+def test_report_custom_columns(mock_vocab_cls, mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
     _write_csv(csv_path, columns=("text", "transcript"))
 
@@ -46,7 +48,8 @@ def test_report_custom_columns(mock_dataset_cls, mock_generate_report, tmp_path)
 
 @patch("corti_canal.cli.main.generate_report")
 @patch("corti_canal.cli.main.Dataset")
-def test_report_with_medical_terms(mock_dataset_cls, mock_generate_report, tmp_path):
+@patch("corti_canal.cli.main.Vocabulary")
+def test_report_with_medical_terms(mock_vocab_cls, mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
     _write_csv(csv_path)
     terms_path = tmp_path / "terms.txt"
@@ -57,17 +60,22 @@ def test_report_with_medical_terms(mock_dataset_cls, mock_generate_report, tmp_p
 
     assert result.exit_code == 0
 
+    mock_vocab_cls.assert_called_once_with("medical_terms")
+    vocab_instance = mock_vocab_cls.return_value
+    vocab_instance.add_terms.assert_called_once_with(["hypertension", "diabetes"])
+
     instance = mock_dataset_cls.return_value
-    instance.add_keyword_list.assert_called_once_with("medical_terms", ["hypertension", "diabetes"])
+    instance.add_vocabulary.assert_called_once_with(vocab_instance)
 
     call_kwargs = mock_generate_report.call_args[1]
     metric_names = [m.name for m in call_kwargs["report_metrics"]]
-    assert "mtr" in metric_names
+    assert "ktr" in metric_names
 
 
 @patch("corti_canal.cli.main.generate_report")
 @patch("corti_canal.cli.main.Dataset")
-def test_report_without_medical_terms(mock_dataset_cls, mock_generate_report, tmp_path):
+@patch("corti_canal.cli.main.Vocabulary")
+def test_report_without_medical_terms(mock_vocab_cls, mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
     _write_csv(csv_path)
 
@@ -76,18 +84,40 @@ def test_report_without_medical_terms(mock_dataset_cls, mock_generate_report, tm
 
     assert result.exit_code == 0
 
+    mock_vocab_cls.assert_not_called()
+
     instance = mock_dataset_cls.return_value
-    instance.add_keyword_list.assert_not_called()
+    instance.add_vocabulary.assert_not_called()
 
     call_kwargs = mock_generate_report.call_args[1]
     metric_names = [m.name for m in call_kwargs["report_metrics"]]
-    assert metric_names == ["wer", "cer"]
-    assert "mtr" not in metric_names
+    assert metric_names == ["wer", "cer", "per"]
+    assert "ktr" not in metric_names
 
 
 @patch("corti_canal.cli.main.generate_report")
 @patch("corti_canal.cli.main.Dataset")
-def test_report_normalization_enabled_by_default(mock_dataset_cls, mock_generate_report, tmp_path):
+@patch("corti_canal.cli.main.Vocabulary")
+def test_report_per_in_default_metrics(mock_vocab_cls, mock_dataset_cls, mock_generate_report, tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(csv_path)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["report", str(csv_path)])
+
+    assert result.exit_code == 0
+
+    call_kwargs = mock_generate_report.call_args[1]
+    metric_names = [m.name for m in call_kwargs["report_metrics"]]
+    assert "per" in metric_names
+    per_metric = next(m for m in call_kwargs["report_metrics"] if m.name == "per")
+    assert per_metric.metric_kwargs["normalized"] is True
+
+
+@patch("corti_canal.cli.main.generate_report")
+@patch("corti_canal.cli.main.Dataset")
+@patch("corti_canal.cli.main.Vocabulary")
+def test_report_normalization_enabled_by_default(mock_vocab_cls, mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
     _write_csv(csv_path)
 
@@ -104,7 +134,8 @@ def test_report_normalization_enabled_by_default(mock_dataset_cls, mock_generate
 
 @patch("corti_canal.cli.main.generate_report")
 @patch("corti_canal.cli.main.Dataset")
-def test_report_disable_normalization(mock_dataset_cls, mock_generate_report, tmp_path):
+@patch("corti_canal.cli.main.Vocabulary")
+def test_report_disable_normalization(mock_vocab_cls, mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
     _write_csv(csv_path)
 
@@ -121,7 +152,8 @@ def test_report_disable_normalization(mock_dataset_cls, mock_generate_report, tm
 
 @patch("corti_canal.cli.main.generate_report")
 @patch("corti_canal.cli.main.Dataset")
-def test_report_alignment_type_ea(mock_dataset_cls, mock_generate_report, tmp_path):
+@patch("corti_canal.cli.main.Vocabulary")
+def test_report_alignment_type_ea(mock_vocab_cls, mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
     _write_csv(csv_path)
 
@@ -136,7 +168,8 @@ def test_report_alignment_type_ea(mock_dataset_cls, mock_generate_report, tmp_pa
 
 @patch("corti_canal.cli.main.generate_report")
 @patch("corti_canal.cli.main.Dataset")
-def test_report_custom_output_path(mock_dataset_cls, mock_generate_report, tmp_path):
+@patch("corti_canal.cli.main.Vocabulary")
+def test_report_custom_output_path(mock_vocab_cls, mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
     _write_csv(csv_path)
     output = tmp_path / "custom.html"
@@ -152,7 +185,8 @@ def test_report_custom_output_path(mock_dataset_cls, mock_generate_report, tmp_p
 
 @patch("corti_canal.cli.main.generate_report")
 @patch("corti_canal.cli.main.Dataset")
-def test_report_overwrite_flag(mock_dataset_cls, mock_generate_report, tmp_path):
+@patch("corti_canal.cli.main.Vocabulary")
+def test_report_overwrite_flag(mock_vocab_cls, mock_dataset_cls, mock_generate_report, tmp_path):
     csv_path = tmp_path / "data.csv"
     _write_csv(csv_path)
 
@@ -163,6 +197,44 @@ def test_report_overwrite_flag(mock_dataset_cls, mock_generate_report, tmp_path)
 
     call_kwargs = mock_generate_report.call_args[1]
     assert call_kwargs["allow_overwrite"] is True
+
+
+@patch("corti_canal.cli.main.generate_report")
+@patch("corti_canal.cli.main.Dataset")
+@patch("corti_canal.cli.main.Vocabulary")
+def test_report_multiple_gen_cols(mock_vocab_cls, mock_dataset_cls, mock_generate_report, tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(csv_path, columns=("ref", "model_a", "model_b"))
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["report", "--gen-col", "model_a", "--gen-col", "model_b", str(csv_path)])
+
+    assert result.exit_code == 0
+
+    assert mock_dataset_cls.call_count == 2
+
+    call_kwargs = mock_generate_report.call_args[1]
+    report_dataset = call_kwargs["dataset"]
+    assert isinstance(report_dataset, dict)
+    assert set(report_dataset.keys()) == {"model_a", "model_b"}
+
+
+@patch("corti_canal.cli.main.generate_report")
+@patch("corti_canal.cli.main.Dataset")
+@patch("corti_canal.cli.main.Vocabulary")
+def test_report_single_gen_col_passes_dataset_not_dict(
+    mock_vocab_cls, mock_dataset_cls, mock_generate_report, tmp_path
+):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(csv_path)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["report", str(csv_path)])
+
+    assert result.exit_code == 0
+
+    call_kwargs = mock_generate_report.call_args[1]
+    assert not isinstance(call_kwargs["dataset"], dict)
 
 
 def test_report_missing_input():
