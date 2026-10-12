@@ -100,7 +100,7 @@ Use `canal report --help` to view the full command description and available opt
 <tr><td><code>--ref-col</code></td><td><code>ref</code></td></tr>
 <tr><td colspan="2">Name of the CSV column containing the ground-truth <strong>reference</strong> transcripts.</td></tr>
 <tr><td><code>--gen-col</code></td><td><code>gen</code></td></tr>
-<tr><td colspan="2">Name of the CSV column containing the model-<strong>generated</strong> transcripts.</td></tr>
+<tr><td colspan="2">Name of the CSV column containing the model-<strong>generated</strong> transcripts. Pass multiple times to compare several hypotheses in the same report (e.g. <code>--gen-col model_a --gen-col model_b</code>).</td></tr>
 <tr><td><code>--medical-terms</code></td><td><code>None</code></td></tr>
 <tr><td colspan="2">Path to a file containing medical terms (one per line) used to compute the Medical Term Recall metric. If not provided, Medical Term Recall will not be computed.</td></tr>
 <tr><td><code>--disable-normalization</code></td><td><code>False</code></td></tr>
@@ -122,6 +122,9 @@ canal report --ref-col text --gen-col transcript --output-path report.html data.
 
 # With medical term recall
 canal report --medical-terms medical_terms.txt data.csv
+
+# Compare multiple hypotheses in one report
+canal report --gen-col model_a --gen-col model_b data.csv
 ```
 
 ### Input CSV format
@@ -168,6 +171,7 @@ The summary section contains two tables side by side:
 <tr><th>Metric</th><th>What it measures</th></tr>
 <tr><td><strong>Word Error Rate (WER)</strong></td><td>The proportion of words the model got wrong — whether by misspelling them, adding extra words, or leaving words out. A WER of 0% means every word was correct; 6% means roughly 6 in 100 words had an error. <strong>Lower is better.</strong></td></tr>
 <tr><td><strong>Character Error Rate (CER)</strong></td><td>Like WER, but counted per character instead of per word. This gives a more fine-grained view: a single-letter typo (e.g. "amoxicillin" → "amoxicilin") counts as one full word error in WER but only a small character error in CER. <strong>Lower is better.</strong></td></tr>
+<tr><td><strong>Punctuation Error Rate (PER)</strong></td><td>Measures the accuracy of punctuation prediction by aligning reference and hypothesis with all punctuation masked to a unified label, then checking exact punctuation identity at each aligned position. <strong>Lower is better.</strong></td></tr>
 <tr><td><strong>Medical Term Recall (MTR)</strong></td><td>The proportion of medical terms from your keyword list that the model transcribed correctly. 100% means every term was captured. Only shown when the <code>--medical-terms</code> option is used. <strong>Higher is better.</strong></td></tr>
 </table>
 
